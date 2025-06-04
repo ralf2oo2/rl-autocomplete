@@ -2,7 +2,10 @@ import torch
 import random
 import numpy as np
 import pandas as pd
+import os
 from PPO import PPOAgent
+
+save_dir = "./training/model1"
 
 max_seq_len = 15
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -14,15 +17,21 @@ int_to_char = {i: c for i, c in enumerate(alphabet)}
 vocab_size = len(alphabet) + 1  # +1 for PAD
 
 agent = PPOAgent(nb_actions=vocab_size, device=device)
-agent.load('ppo_checkpoint.pth')
+agent.load('./training/model1/ppo_checkpoint_epoch_80.pth')
 
 words = pd.read_csv("dataset_clean.csv")['word'].str.lower().tolist()
 words = [w for w in words if w.isalpha()]
 
-for epoch in range(10):
+def save(save_agent, dir, save_epoch):
+    path = os.path.join(dir, f'ppo_checkpoint_epoch_{save_epoch}.pth')
+    os.makedirs(dir, exist_ok=True)
+    save_agent.save(path)
+    print(f"saved model to {path}")
+
+for epoch in range(100):
     states, actions, log_probs, rewards, values, dones = [], [], [], [], [], []
     
-    for _ in range(50):  # steps per epoch
+    for _ in range(500):  # steps per epoch
         word = random.choice(words)
         for t in range(len(word) - 1):
             partial = word[:t]
@@ -65,6 +74,12 @@ for epoch in range(10):
     agent.ppo_update(states, actions, log_probs, returns, values)
 
     avg_reward = np.mean(rewards)
+
+    if epoch % 20 == 0:
+        save(agent, save_dir, epoch)
     print(f"Epoch {epoch}: Avg reward per step: {avg_reward:.2f}")
 
-agent.save('ppo_checkpoint.pth')
+save(agent, save_dir, epoch)
+
+
+
