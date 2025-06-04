@@ -38,6 +38,31 @@ class PPOAgent:
         self.model = ActorCritic(nb_actions).to(device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
 
+    def save(self, path):
+        torch.save({
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'hyperparams': {
+                'gamma': self.gamma,
+                'lam': self.lam,
+                'clip_eps': self.clip_eps,
+                'epochs': self.epochs,
+                'batch_size': self.batch_size
+            }
+        }, path)
+    
+    def load(self, path):
+        checkpoint = torch.load(path, map_location=self.device)
+        self.model.load_state_dict(checkpoint['model_state_dict'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+
+        h = checkpoint.get('hyperparams', {})
+        self.gamma = h.get('gamma', self.gamma)
+        self.lam = h.get('lam', self.lam)
+        self.clip_eps = h.get('clip_eps', self.clip_eps)
+        self.epochs = h.get('epochs', self.epochs)
+        self.batch_size = h.get('batch_size', self.batch_size)
+
     def get_action_and_value(self, state):
         logits, value = self.model(state)
         dist = Categorical(logits=logits)

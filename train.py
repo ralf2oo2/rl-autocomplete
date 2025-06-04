@@ -14,11 +14,12 @@ int_to_char = {i: c for i, c in enumerate(alphabet)}
 vocab_size = len(alphabet) + 1  # +1 for PAD
 
 agent = PPOAgent(nb_actions=vocab_size, device=device)
+agent.load('ppo_checkpoint.pth')
 
 words = pd.read_csv("dataset_clean.csv")['word'].str.lower().tolist()
 words = [w for w in words if w.isalpha()]
 
-for epoch in range(1000):
+for epoch in range(10):
     states, actions, log_probs, rewards, values, dones = [], [], [], [], [], []
     
     for _ in range(50):  # steps per epoch
@@ -65,3 +66,5 @@ for epoch in range(1000):
 
     avg_reward = np.mean(rewards)
     print(f"Epoch {epoch}: Avg reward per step: {avg_reward:.2f}")
+
+agent.save('ppo_checkpoint.pth')
