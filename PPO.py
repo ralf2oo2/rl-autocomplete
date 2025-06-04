@@ -6,15 +6,24 @@ import numpy as np
 from torch.distributions import Categorical
 class ActorCritic(nn.Module):
 
-    def __init__(self, nb_actions):
+    def __init__(self, nb_actions, vocab_size=26, embed_dim=32, hidden_size=64):
         super().__init__()
-        self.head = nn.Sequential(nn.Linear(4, 64), nn.Tanh(),
-                                    nn.Linear(64, 64), nn.Tanh())
-        self.actor = nn.Sequential(nn.Linear(64, nb_actions))
-        self.critic = nn.Sequential(nn.Linear(64, 1))
+        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.rnn = nn.GRU(embed_dim, hidden_size, batch_first=True)
+
+        self.head = nn.Sequential(
+            nn.Linear(hidden_size, 64), nn.Tanh(),
+            nn.Linear(64, 64), nn.Tanh()
+        )
+        self.actor = nn.Linear(64, nb_actions)
+        self.critic = nn.Linear(64, 1)
     
     def forward(self, x):
-        h = self.head(x)
+        x = self.embedding(x)
+        _, h = self.rnn(x)
+        h = h.squeeze(0)
+
+        h = self.head(h)
         return self.actor(h), self.critic(h)
 
 class PPOAgent:
