@@ -6,7 +6,7 @@ import torch
 env = gym.make('CartPole-v1')
 agent = PPOAgent(nb_actions=env.action_space.n)
 
-max_episodes = 1000
+max_episodes = 10000
 max_steps = 500
 
 for episode in range(max_episodes):
@@ -16,7 +16,8 @@ for episode in range(max_episodes):
     
     for _ in range(max_steps):
         state_tensor = torch.from_numpy(state).float().unsqueeze(0)
-        action, log_prob, value = agent.get_action_and_value(state_tensor)
+        action_tensor, log_prob, value = agent.get_action_and_value(state_tensor)
+        action = int(action_tensor)
         next_state, reward, terminated, truncated, _ = env.step(action)
         done = terminated or truncated
 
