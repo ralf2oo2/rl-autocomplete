@@ -6,9 +6,9 @@ import numpy as np
 from torch.distributions import Categorical
 class ActorCritic(nn.Module):
 
-    def __init__(self, nb_actions, vocab_size=26, embed_dim=32, hidden_size=64):
+    def __init__(self, nb_actions, embed_dim=32, hidden_size=64):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.embedding = nn.Embedding(nb_actions, embed_dim)
         self.rnn = nn.GRU(embed_dim, hidden_size, batch_first=True)
 
         self.head = nn.Sequential(
@@ -65,7 +65,7 @@ class PPOAgent:
 
             for i in range(0, len(states), self.batch_size):
                 idx = indices[i:i+self.batch_size]
-                s_batch = torch.tensor(states[idx], dtype=torch.float32).to(self.device)
+                s_batch = torch.tensor(states[idx]).to(self.device)
                 a_batch = torch.tensor(actions[idx]).to(self.device)
                 old_log_probs_batch = torch.tensor(log_probs[idx]).to(self.device)
                 ret_batch = torch.tensor(returns[idx], dtype=torch.float32).to(self.device)
