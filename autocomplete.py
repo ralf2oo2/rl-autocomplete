@@ -14,7 +14,7 @@ int_to_char = {i: c for i, c in enumerate(alphabet)}
 
 # Load the trained agent
 agent = PPOAgent(nb_actions=len(alphabet) + 1, device=device)
-agent.load('ppo_checkpoint.pth')  # path to your saved checkpoint
+agent.load('./training/model1/ppo_checkpoint_epoch_8160.pth')  # path to saved checkpoint with highest count
 
 def predict_next_char(partial_word: str) -> str:
     partial_word = partial_word.lower()
@@ -27,9 +27,8 @@ def predict_next_char(partial_word: str) -> str:
     state_tensor = torch.tensor([encoded], dtype=torch.long).to(device)
     action, _, _ = agent.get_action_and_value(state_tensor)
 
-    return int_to_char.get(action.item(), '?')
+    return int_to_char.get(action.item(), '')
 
-# Example usage
 if __name__ == "__main__":
     while True:
         user_input = input("Enter partial word (or 'quit'): ").strip()

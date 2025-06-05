@@ -28,7 +28,7 @@ def save(save_agent, dir, save_epoch):
     save_agent.save(path)
     print(f"saved model to {path}")
 
-for epoch in range(100):
+for epoch in range(100000000000000):
     states, actions, log_probs, rewards, values, dones = [], [], [], [], [], []
     
     for _ in range(500):  # steps per epoch
