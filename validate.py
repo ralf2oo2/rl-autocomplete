@@ -20,7 +20,7 @@ agent.load('./training/model1/ppo_checkpoint_epoch_8160.pth')
 words = pd.read_csv("dataset_clean.csv")['word'].str.lower().tolist()
 words = [w for w in words if w.isalpha()]
 
-def validate(agent, words, num_samples=1000):
+def validate(agent, words, num_samples=1000, section_length=-1):
     char_correct = {}
     char_total = {}
     char_missed = {}
@@ -29,9 +29,12 @@ def validate(agent, words, num_samples=1000):
 
     with torch.no_grad(): # might not be nessecary since the agent only trains when I call the update ppo function
         for _ in range(num_samples):
-            word = random.choice(words)
+            if section_length == -1:
+                word = random.choice(words)
+            else:
+                word = random.choice([w for w in words if len(w) >= section_length + 1])
             
-            t = random.randint(1, len(word) - 1) # get random part of word, don't need to check for every part of the word
+            t = random.randint(1, len(word) - 1) if section_length == -1 else section_length # get random part of word, don't need to check for every part of the word
 
             partial = word[:t]
             target_char = word[t]
@@ -64,7 +67,6 @@ def validate(agent, words, num_samples=1000):
 
 accuracy, correct_guesses, total_guesses, char_correct, char_missed, char_total = validate(agent, words, 1000)
 print(f"Validation Accuracy: {accuracy:.4f} ({correct_guesses}/{total_guesses})")
-
 all_chars = sorted(
     c for c in (set(char_total.keys()) | set(char_correct.keys()) | set(char_missed.keys()))
     if c != '?'
