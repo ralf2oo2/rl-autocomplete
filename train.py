@@ -5,7 +5,7 @@ import pandas as pd
 import os
 from PPO import PPOAgent
 
-save_dir = "./training/model1"
+save_dir = "./training/model2"
 
 max_seq_len = 15
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -17,7 +17,7 @@ int_to_char = {i: c for i, c in enumerate(alphabet)}
 vocab_size = len(alphabet) + 1  # +1 for PAD
 
 agent = PPOAgent(nb_actions=vocab_size, device=device)
-agent.load('./training/model1/ppo_checkpoint_epoch_80.pth')
+#agent.load('./training/model1/ppo_checkpoint_epoch_80.pth')
 
 words = pd.read_csv("dataset_clean.csv")['word'].str.lower().tolist()
 words = [w for w in words if w.isalpha()]
